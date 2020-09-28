@@ -8,11 +8,13 @@ class ShopeeThread(LazyPageThread):
     def __init__(self, keywords, url):
         super(ShopeeThread, self).__init__(keywords, url)
         self.max_item = 50
-        self.item_num = 50
+        self.item_num = self.max_item
 
     def run(self):
         super(ShopeeThread, self).run(keyClass="shopee-search-item-result__items",
-                                      classForScroll="row shopee-search-item-result__items")
+                                      classForScroll="row shopee-search-item-result__items",
+                                      classForPageNumber="shopee-mini-page-controller__total",
+                                      )
 
     def handle_result(self):
         print('------------------------------')
@@ -33,3 +35,7 @@ class ShopeeThread(LazyPageThread):
                                    url=item.a.get("href"),
                                    )
             print(product.info())
+            
+    
+    def get_total_page_num(self):
+        return super().get_total_page_num()

@@ -3,9 +3,11 @@
 
 from ShopeeThread import ShopeeThread
 
-KEYWORDS = "Chuột, Logitech"
 
-CATEGORY_URL = "https://shopee.vn/search?category=2365"
+if __name__ == '__main__':
+    KEYWORDS = "Chuột, Logitech"
 
-SHOPEE = ShopeeThread(keywords=KEYWORDS,
-                      url=CATEGORY_URL).run()
+    CATEGORY_URL = "https://shopee.vn/search?category=2365"
+
+    ShopeeThread(keywords=KEYWORDS,
+                 url=CATEGORY_URL).run()
