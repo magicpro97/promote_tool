@@ -28,7 +28,11 @@ class LazyPageThread(ABC):
         last_page = self.page_range[1]
 
         options = Options()
-        # options.headless = True
+        options.add_argument("--headless")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--window-size=1920x1080")
+        options.add_argument("start-maximised")
 
         while self.has_next_page():
             self.url = self.url + "&page=" + str(page)
