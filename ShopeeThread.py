@@ -7,21 +7,24 @@ from PromotedItem import PromotedItem
 class ShopeeThread(LazyPageThread):
     def __init__(self, keywords, url):
         super(ShopeeThread, self).__init__(keywords, url)
+        self.max_item = 50
+        self.item_num = 50
 
     def run(self):
         super(ShopeeThread, self).run(keyClass="shopee-search-item-result__items",
-                  classForScroll="row shopee-search-item-result__items")
+                                      classForScroll="row shopee-search-item-result__items")
 
-    def handleResult(self):
+    def handle_result(self):
         print('------------------------------')
 
-        # bsoup = BeautifulSoup(res.text, 'lxml')
         bsoup = BeautifulSoup(self.html, 'lxml')
 
         items = bsoup.findAll(
             "div", {"class": "col-xs-2-4 shopee-search-item-result__item", })
 
-        print("TOTAL:::" + str(len(items)))
+        self.item_num = len(items)
+
+        print("TOTAL:::" + str(self.item_num))
 
         for item in items:
             product = PromotedItem(name=item.find("div", {"class": "_1NoI8_"}).string,

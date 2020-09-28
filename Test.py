@@ -3,7 +3,9 @@
 
 from ShopeeThread import ShopeeThread
 
-KEYWORDS = "Chuột, Logitech, Bluetooth".split(',')
+KEYWORDS = "Chuột, Logitech"
+
+CATEGORY_URL = "https://shopee.vn/search?category=2365"
 
 SHOPEE = ShopeeThread(keywords=KEYWORDS,
-                      url="https://shopee.vn/search?category=2365&keyword=chu%E1%BB%99t%20logitech").run()
+                      url=CATEGORY_URL).run()
