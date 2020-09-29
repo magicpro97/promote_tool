@@ -7,8 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from Helper import scroll_down
 from abc import ABC, abstractmethod
+from multiprocessing import Pool, Manager, Process
 import psutil
-from multiprocessing import Pool
 
 
 class LazyPageThread(ABC):
@@ -34,18 +34,12 @@ class LazyPageThread(ABC):
 
     def run(self, keyClass, classForScroll, classForPageNumber):
         cpu_num = psutil.cpu_count()
+
         print("Processor:::" + str(cpu_num))
         pool = Pool(cpu_num)
 
         page = self.page_range[0]
         last_page = self.page_range[1]
-
-        options = Options()
-        options.add_argument("--headless")
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-dev-shm-usage")
-        options.add_argument("--window-size=1920x1080")
-        options.add_argument("start-maximised")
 
         driver = webdriver.Chrome(
             ChromeDriverManager().install(), chrome_options=self.options)
@@ -61,41 +55,28 @@ class LazyPageThread(ABC):
                 driver.find_element_by_class_name(classForPageNumber).text)
             driver.quit()
 
-        # for i in range(self.total_page):
-        #     pool.apply_async(self.__crawling, (self.url, i,))
+        products = Manager().list()
 
-        results = [pool.apply_async(self.crawling, (self.url, keyClass,
-                                                    classForScroll, i, self.options)) for i in range(self.total_page)]
-        print([res.get(timeout=30) for res in results])
+        results = [pool.apply_async(self.crawling, (
+            self.url,
+            keyClass,
+            classForScroll,
+            i,
+            self.options,
+            products,
+        ),
+        ) for i in range(self.total_page)]
 
-        # while self.has_next_page():
-        #     self.url = self.url + "&page=" + str(page)
-        #     print('Make request to: ' + self.url)
+        for res in results:
+            res.wait(timeout=60)
+            
+        print(len(products))
 
-        #     driver = webdriver.Chrome(
-        #         ChromeDriverManager().install(), chrome_options=options)
-        #     driver.get(self.url)
+    @abstractmethod
+    def sort(self, value):
+        pass
 
-        #     try:
-        #         WebDriverWait(driver, 10).until(
-        #             EC.presence_of_element_located(
-        #                 (By.CLASS_NAME, keyClass))
-        #         )
-        #         scroll_down(
-        #             driver, "document.getElementsByClassName('" + classForScroll + "')[0].clientHeight")
-        #     finally:
-        #         self.html = driver.page_source
-        #         driver.quit()
-
-        #     self.handle_result()
-
-        #     if last_page > -1:
-        #         if page <= last_page and self.has_next_page():
-        #             page = page + 1
-        #     elif self.has_next_page():
-        #         page = page + 1
-
-    def crawling(self, url, keyClass, classForScroll, page_num, options):
+    def crawling(self, url, keyClass, classForScroll, page_num, options, products):
         url = url + "&page=" + str(page_num)
         driver = webdriver.Chrome(
             ChromeDriverManager().install(), chrome_options=options)
@@ -112,17 +93,8 @@ class LazyPageThread(ABC):
             self.html = driver.page_source
             driver.quit()
 
-        self.handle_result()
-        
-        return "PAGE:::"+ url + " DONE!"
+        products.extend(self.handle_result())
 
     @abstractmethod
     def handle_result(self):
-        pass
-
-    def has_next_page(self):
-        return self.item_num == self.max_item
-
-    @abstractmethod
-    def get_total_page_num(self):
         pass

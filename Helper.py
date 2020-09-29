@@ -1,6 +1,7 @@
 import os
 import time
 import re
+import pandas as pd
 
 
 def clear(): os.system('clear')
@@ -43,3 +44,21 @@ def trim_indent(s: str):
     if len(spaces) > 0 and len(re.findall(r'^[^\s]', s, flags=re.MULTILINE)) == 0:
         s = re.sub(r'^%s' % (min(spaces)), '', s, flags=re.MULTILINE)
     return s
+
+
+def value_to_num(value: str):
+    value = value.lower()
+    
+    if ',' in value:
+        value.replace(',', '.')
+    
+    if 'k' in value:
+        value = value.replace('k', '*1e3')
+        
+    if 'm' in value:
+        value = value.replace('m', '*1e6')
+        
+    if 'b' in value:
+        value = value.replace('b', '*1e9')
+
+    return pd.eval(value)
