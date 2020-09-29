@@ -25,3 +25,6 @@ class PromotedItem:
                          url=self.url,
                          rating=self.rating,
                          sold=self.sold,))
+
+    def __str__(self):
+        return info()
